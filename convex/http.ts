@@ -1,7 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
-import type { WebhookEvent } from "@clerk/backend";
+import type { WebhookEvent } from "@clerk/nextjs/server";
 import { Webhook } from "svix";
 
 const handleClerkWebhook = httpAction(async (ctx, request) => {
@@ -29,7 +29,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         break;
     case "user.deleted":
         await ctx.runMutation(internal.users.deleteUser, {
-            clerkId: event.data.id,
+            clerkId: event.data.id as string,
         });
         break;
   }
@@ -48,6 +48,7 @@ http.route({
 async function validateRequest(
   req: Request
 ): Promise<WebhookEvent | undefined> {
+  // TODO: Update CLERK_WEBHOOK_SECRET
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
     if (!webhookSecret) {
         throw new Error("CLERK_WEBHOOK_SECRET is not defined");
